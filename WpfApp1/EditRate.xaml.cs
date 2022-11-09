@@ -4,6 +4,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using System;
 
 namespace WpfApp1
 {
@@ -75,12 +76,16 @@ namespace WpfApp1
             {
                 if (MessageBox.Show("Вы подтверждаете добавление?", "Добавление тарифа", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.Yes)
                 {
-                    SqlConnection con = new SqlConnection(sqlCon.ConString);
-                    SqlCommand com = new SqlCommand("insert into rate values ('" + name.Text + "', '" + discription.Text + "', '" + price.Text + "');", con);
-                    SqlDataAdapter ad = new SqlDataAdapter(com);
-                    DataTable dt = new DataTable();
-                    ad.Fill(dt);
-                    security.logsInsert("Добавление тарифа - " + ID + " " + name.Text + " " + discription.Text + " " + price.Text);
+                    try
+                    {
+                        int priceP = Convert.ToInt32(price.Text);
+                        sqlCon.sqlServer("insert into rate values ('" + name.Text + "', '" + discription.Text + "', '" + price.Text + "');");
+                        security.logsInsert("Добавление тарифа - " + ID + " " + name.Text + " " + discription.Text + " " + price.Text);
+                    }
+                    catch
+                    {
+                        MessageBox.Show("В поле со стоимостью тарифа, вводить исключительно цифры!");
+                    } 
                 }
             }
             else
@@ -95,13 +100,16 @@ namespace WpfApp1
         {
             if (MessageBox.Show("Вы подтверждаете изменение?", "Изменение сотрудника", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.Yes)
             {
-                SqlConnection con = new SqlConnection(sqlCon.ConString);
-                SqlCommand com = new SqlCommand("update rate set name = '" + name.Text + "', discription = '" + discription.Text + "', price = " + price.Text + " where id_rate=" + ID + ";", con);
-
-                SqlDataAdapter ad = new SqlDataAdapter(com);
-                DataTable dt = new DataTable();
-                ad.Fill(dt);
-                security.logsInsert("Изменение для тарифа - " + ID + " " + name.Text + " " + discription.Text + " " + price.Text);
+                try
+                {
+                    int priceP = Convert.ToInt32(price.Text);
+                    sqlCon.sqlServer("update rate set name = '" + name.Text + "', discription = '" + discription.Text + "', price = " + price.Text + " where id_rate=" + ID + ";");
+                    security.logsInsert("Изменение для тарифа - " + ID + " " + name.Text + " " + discription.Text + " " + price.Text);
+                }
+                catch
+                {
+                    MessageBox.Show("В поле со стоимостью тарифа, вводить исключительно цифры!");
+                }
             }
         }
 

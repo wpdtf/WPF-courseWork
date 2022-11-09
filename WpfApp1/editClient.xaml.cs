@@ -120,8 +120,6 @@ namespace WpfApp1
         {
             if (MessageBox.Show("Вы подтверждаете изменение?", "Изменение клиента", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.Yes)
             {
-                SqlConnection con = new SqlConnection(sqlCon.ConString);
-                SqlCommand com = new SqlCommand("", con);
 
                 ComboBox comboBox1 = comboRate;
                 ComboBoxItem selectedItem1 = (ComboBoxItem)comboBox1.SelectedItem;
@@ -134,16 +132,12 @@ namespace WpfApp1
 
                 if (password.Text == "" && password.Text == " ")
                 {
-                    com = new SqlCommand("update Client set Family = '" + family.Text + "', Name = '" + name.Text + "', MiddleName = '" + MiddleName.Text + "', login = '" + login.Text + "', password='" + security.getHash(password.Text) + "', rate = " + id_rate + ", home = " + id_home + " where id_client=" + ID + ";", con);
-                    
+                    sqlCon.sqlServer("update Client set Family = '" + family.Text + "', Name = '" + name.Text + "', MiddleName = '" + MiddleName.Text + "', login = '" + login.Text + "', password='" + security.getHash(password.Text) + "', rate = " + id_rate + ", home = " + id_home + " where id_client=" + ID + ";");
                 }
                 else
                 {
-                    com = new SqlCommand("update Client set Family = '" + family.Text + "', Name = '" + name.Text + "', MiddleName = '" + MiddleName.Text + "', login = '" + login.Text + "', rate = " + id_rate + ", home = " + id_home + " where id_client=" + ID + ";", con);
+                    sqlCon.sqlServer("update Client set Family = '" + family.Text + "', Name = '" + name.Text + "', MiddleName = '" + MiddleName.Text + "', login = '" + login.Text + "', rate = " + id_rate + ", home = " + id_home + " where id_client=" + ID + ";");
                 }
-                SqlDataAdapter ad = new SqlDataAdapter(com);
-                DataTable dt = new DataTable();
-                ad.Fill(dt);
                 security.logsInsert("Изменение для клиента - " + ID);
             }
         }

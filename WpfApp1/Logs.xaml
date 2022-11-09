@@ -165,6 +165,12 @@
 
         <ScrollViewer VerticalScrollBarVisibility="auto" Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3">
             <StackPanel Margin="30" VerticalAlignment="Top">
+                <StackPanel Orientation="Horizontal">
+                    <CheckBox Content="не показывать авторизацию" Margin="10" IsThreeState="False" Checked="checkDls" Unchecked ="checkSDls" Name="avtoris" />
+                    <CheckBox Content="не показывать изменения" Margin="10" IsThreeState="False" Checked="checkDls" Unchecked ="checkSDls" Name="editDls" />
+                    <CheckBox Content="не показывать добавления" Margin="10" IsThreeState="False" Checked="checkDls" Unchecked ="checkSDls" Name="nowDls" />
+                    <CheckBox Content="не показывать удаление" Margin="10" IsThreeState="False" Checked="checkDls" Unchecked ="checkSDls" Name="deleteDls" />
+                </StackPanel>
                 <DataGrid Style="{DynamicResource DataGridStyle1}" Name="dataGrids" IsReadOnly="True" AutoGenerateColumns="True" HeadersVisibility="Column" ColumnWidth="*"
                           RowBackground="White" AlternatingRowBackground="White"/>
             </StackPanel>

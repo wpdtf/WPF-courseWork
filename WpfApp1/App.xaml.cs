@@ -17,6 +17,25 @@ namespace WpfApp1
         public static string Post;
         public static int levelWork;
         public static int levelPrivil;
+
+        public static DataTable sqlServer(string sqlStroke)
+        {
+            try
+            {
+                SqlConnection con = new SqlConnection(sqlCon.ConString);
+                SqlCommand com = new SqlCommand(sqlStroke, con);
+                SqlDataAdapter adapter = new SqlDataAdapter(com);
+                DataTable dat = new DataTable();
+                adapter.Fill(dat);
+                return dat;
+            }
+            catch
+            {
+                MessageBox.Show("Ошибка обращения к базе данных");
+                return null;
+            }
+            
+        }
     }
 
     public class chatFunc
@@ -49,6 +68,7 @@ namespace WpfApp1
             }
         }
     }
+
 
     public partial class App : Application
     {

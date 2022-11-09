@@ -32,11 +32,7 @@ namespace WpfApp1
             {
                 try
                 {
-                    SqlConnection con = new SqlConnection(sqlCon.ConString);
-                    SqlCommand com = new SqlCommand("select * from sotrAuthorChecked where login = '" + Logins.Text + "' and password = '" + security.getHash(Password.Password) + "';", con);
-                    SqlDataAdapter adapter = new SqlDataAdapter(com);
-                    DataTable dat = new DataTable();
-                    adapter.Fill(dat);
+                    DataTable dat = sqlCon.sqlServer("select * from sotrAuthorChecked where login = '" + Logins.Text + "' and password = '" + security.getHash(Password.Password) + "';");
                     if (dat.Rows.Count != 0)
                     {
                         sqlCon.ID = dat.Rows[0].Field<Int32>("id_sotr");
@@ -69,10 +65,7 @@ namespace WpfApp1
                 Errors.Text = "Заполните поля";
                 Logins.Text = "";
                 Password.Password = "";
-            }
-
-            
-            
+            } 
         }
 
         private void ClickMove(object sender, RoutedEventArgs e)

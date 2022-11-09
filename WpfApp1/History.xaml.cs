@@ -6,6 +6,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Navigation;
+using System.Threading;
 
 namespace WpfApp1
 {
@@ -57,15 +58,21 @@ namespace WpfApp1
                 {
 
                     checkSumBD = resultsql;
-                    dataGrids.ItemsSource = null;
-                    com = new SqlCommand("select * from historyChecked where id_sotr = " + sqlCon.ID + ";", con);
-                    ad = new SqlDataAdapter(com);
-                    dt = new DataTable();
-                    ad.Fill(dt);
-                    dt.Columns.Remove("id_sotr");
-                    dataGrids.ItemsSource = dt.DefaultView;
+                    ThreadStart writeSecon = new ThreadStart(updateBD);
+                    Thread thread = new Thread(writeSecon);
+                    thread.Start();
                 }
             }
+        }
+
+        private void updateBD()
+        {
+            DataTable dt = sqlCon.sqlServer("select * from historyChecked where id_sotr = " + sqlCon.ID + " Order by [Дата выполнения заявки];");
+            dt.Columns.Remove("id_sotr");
+            this.Dispatcher.Invoke(() => {
+                dataGrids.ItemsSource = null;
+                dataGrids.ItemsSource = dt.DefaultView;
+            });
         }
 
         private void viewChats(object sender, RoutedEventArgs e)

@@ -75,11 +75,7 @@ namespace WpfApp1
             {
                 if (MessageBox.Show("Вы подтверждаете добавление?", "Добавление сотрудника", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.Yes)
                 {
-                    SqlConnection con = new SqlConnection(sqlCon.ConString);
-                    SqlCommand com = new SqlCommand("insert into HomeLink values ('" + city.Text + "', '" + street.Text + "', '" + home.Text + "');", con);
-                    SqlDataAdapter ad = new SqlDataAdapter(com);
-                    DataTable dt = new DataTable();
-                    ad.Fill(dt);
+                    sqlCon.sqlServer("insert into HomeLink values ('" + city.Text + "', '" + street.Text + "', '" + home.Text + "');");
                     security.logsInsert("Добавление адреса - " + ID + " " + city.Text + " " + street.Text + " " + home.Text);
                 }
             }
@@ -95,12 +91,7 @@ namespace WpfApp1
         {
             if (MessageBox.Show("Вы подтверждаете изменение?", "Изменение сотрудника", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.Yes)
             {
-                SqlConnection con = new SqlConnection(sqlCon.ConString);
-                SqlCommand com = new SqlCommand("update HomeLink set city = '" + city.Text + "', street = '" + street.Text + "', home = '" + home.Text + "' where id_home=" + ID + ";", con);
-                
-                SqlDataAdapter ad = new SqlDataAdapter(com);
-                DataTable dt = new DataTable();
-                ad.Fill(dt);
+                sqlCon.sqlServer("update HomeLink set city = '" + city.Text + "', street = '" + street.Text + "', home = '" + home.Text + "' where id_home=" + ID + ";");
                 security.logsInsert("Изменение для адреса - " + ID + " " + city.Text + " " + street.Text + " " + home.Text);
             }
         }

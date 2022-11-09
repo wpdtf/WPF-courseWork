@@ -7,6 +7,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Navigation;
+using Windows.Devices.Sensors;
 
 namespace WpfApp1
 {
@@ -36,6 +37,10 @@ namespace WpfApp1
         private string sheckSum = "exec checkSumLogs;";
         private string checkSumBD = "";
 
+        private string auth = " ";
+        private string update = " ";
+        private string now = " ";
+        private string delete = " ";
 
         private void bdChecked()
         {
@@ -57,26 +62,48 @@ namespace WpfApp1
                 if (checkSumBD != resultsql)
                 {
                     checkSumBD = resultsql;
-                    ThreadStart writeSecon = new ThreadStart(dtUpdate);
-                    Thread thread = new Thread(writeSecon);
-                    thread.Start();
+                    Thread writeSecon = new Thread(dtUpdate);
+                    writeSecon.Start();
                 }
             }
         }
 
         private void dtUpdate()
         {
-            SqlConnection con = new SqlConnection(sqlCon.ConString);
-            SqlCommand com = new SqlCommand("select * from logsChecked;", con);
-            SqlDataAdapter ad = new SqlDataAdapter(com);
-            DataTable dt = new DataTable();
-            ad.Fill(dt);
+            DataTable dt = sqlCon.sqlServer("select * from logsChecked where id_logs>0 " + auth+" " + update + " " + now + " "+delete+";");
             this.Dispatcher.Invoke(() => {
                 dataGrids.ItemsSource = null;
                 dataGrids.ItemsSource = dt.DefaultView;
             });
         }
 
+        private void checkDls(object sender, EventArgs e)
+        {
+            if ((sender as CheckBox).Name == "avtoris")
+                auth = "and [Выполненое действие] not like 'Авторизация' ";
+            if ((sender as CheckBox).Name == "editDls")
+                update = "and [Выполненое действие] not like 'Изменение%' ";
+            if ((sender as CheckBox).Name == "nowDls")
+                now = "and [Выполненое действие] not like 'Добавление%' ";
+            if ((sender as CheckBox).Name == "deleteDls")
+                delete = "and [Выполненое действие] not like 'Удаление%' ";
+            Thread writeSecon = new Thread(dtUpdate);
+            writeSecon.Start();
+        }
+
+        private void checkSDls(object sender, EventArgs e)
+        {
+            if ((sender as CheckBox).Name == "avtoris")
+                auth = " ";
+            if ((sender as CheckBox).Name == "editDls")
+                update = " ";
+            if ((sender as CheckBox).Name == "nowDls")
+                now = " ";
+            if ((sender as CheckBox).Name == "deleteDls")
+                delete = " ";
+            Thread writeSecon = new Thread(dtUpdate);
+            writeSecon.Start();
+        }
 
         private void ContackInfoChanged(object callar, SqlNotificationEventArgs e)
         {

@@ -16,6 +16,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Reflection.Emit;
 using System.Xml.Linq;
+using System.Threading;
 
 namespace WpfApp1
 {
@@ -72,14 +73,20 @@ namespace WpfApp1
                 {
 
                     checkSumBD = resultsql;
-                    dataGrids.ItemsSource = null;
-                    com = new SqlCommand("select * from viewSotrChecked;", con);
-                    ad = new SqlDataAdapter(com);
-                    dt = new DataTable();
-                    ad.Fill(dt);
-                    dataGrids.ItemsSource = dt.DefaultView;
+                    ThreadStart writeSecon = new ThreadStart(updateBD);
+                    Thread thread = new Thread(writeSecon);
+                    thread.Start();
                 }
             }
+        }
+
+        private void updateBD()
+        {
+            DataTable dt = sqlCon.sqlServer("select * from viewSotrChecked;");
+            this.Dispatcher.Invoke(() => {
+                dataGrids.ItemsSource = null;
+                dataGrids.ItemsSource = dt.DefaultView;
+            });
         }
 
 
@@ -99,11 +106,7 @@ namespace WpfApp1
             {
                 DataRowView row = (DataRowView)dataGrids.SelectedItems[0];
                 string ID =  row["ID"].ToString();
-                SqlConnection con = new SqlConnection(sqlCon.ConString);
-                SqlCommand com = new SqlCommand("delete from sotr where id_sotr = "+ID+";", con);
-                SqlDataAdapter ad = new SqlDataAdapter(com);
-                DataTable dt = new DataTable();
-                ad.Fill(dt);
+                sqlCon.sqlServer("delete from sotr where id_sotr = " + ID + ";");
                 security.logsInsert("Удаление сотрудника - " + ID);
             }
         }

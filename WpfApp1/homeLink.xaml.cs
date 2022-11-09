@@ -6,6 +6,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Navigation;
+using System.Threading;
 
 namespace WpfApp1
 {
@@ -63,14 +64,20 @@ namespace WpfApp1
                 {
 
                     checkSumBD = resultsql;
-                    dataGrids.ItemsSource = null;
-                    com = new SqlCommand("select * from homeLinkChecked;", con);
-                    ad = new SqlDataAdapter(com);
-                    dt = new DataTable();
-                    ad.Fill(dt);
-                    dataGrids.ItemsSource = dt.DefaultView;
+                    ThreadStart writeSecon = new ThreadStart(updateBD);
+                    Thread thread = new Thread(writeSecon);
+                    thread.Start();
                 }
             }
+        }
+        
+        private void updateBD()
+        {
+            DataTable dt = sqlCon.sqlServer("select * from homeLinkChecked;");
+            this.Dispatcher.Invoke(() => {
+                dataGrids.ItemsSource = null;
+                dataGrids.ItemsSource = dt.DefaultView;
+            });
         }
 
 

@@ -96,13 +96,19 @@
                 <Button ToolTip="Закрыть обращение" Template="{DynamicResource ButtonTemplate1}"  MouseMove="ClickMove" MouseLeave="ClickLeave" BorderThickness="3" BorderBrush="#0085bc" Click="ClickToBackActive" x:Name="BtnToActive" Foreground="White" Background="#0085bc" Content="Закрыть обр." Height="40" Width="150" FontSize="20" Padding="5" FontFamily="\source\bold.otf" />
             </StackPanel>
         </ScrollViewer>
-        <ScrollViewer VerticalScrollBarVisibility="Auto"  Grid.Row="2" Grid.Column="2" Grid.ColumnSpan="2" >
-            <StackPanel Grid.Row="1" Orientation="Vertical" HorizontalAlignment="Center" Width="auto">
-
-                <TextBox Template="{DynamicResource TextBoxTemplate1}" Name="chat" Width="auto" Height="200" TextWrapping="Wrap" AcceptsReturn="True" Text="" IsReadOnly="True" FontSize="15" Padding="5" FontFamily="\source\bold.otf"/>
-
-                <TextBox Template="{DynamicResource TextBoxTemplate1}" Name="textSend" Width="500" TextWrapping="Wrap" AcceptsReturn="True" Height="auto" FontSize="15" Padding="5" FontFamily="\source\bold.otf"/>
-                <Button Template="{DynamicResource ButtonTemplate1}" MouseMove="ClickMove" MouseLeave="ClickLeave" Foreground="White" Name="btnSend" Content="Отправить" Height="auto" FontSize="15" Padding="5" FontFamily="\source\bold.otf" Click="SendMessage"/>
+        <ScrollViewer VerticalScrollBarVisibility="Auto" Grid.Row="2" Grid.Column="2" Grid.ColumnSpan="2" Name="scrolling" >
+            <StackPanel Grid.Row="1" Orientation="Vertical" HorizontalAlignment="Center" Width="auto" Margin="1, 1, 1, 30">
+                <StackPanel Name="chats" Orientation="Vertical" Width="500" TextBlock.FontSize="15" TextBlock.FontFamily="\source\bold.otf">
+                </StackPanel>
+                <TextBox Template="{DynamicResource TextBoxTemplate1}" HorizontalAlignment="Right" Name="textSend" Width="200" TextWrapping="Wrap" AcceptsReturn="True" Height="auto" FontSize="15" Padding="5" FontFamily="\source\bold.otf"/>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Button Template="{DynamicResource ButtonTemplate1}" MouseMove="ClickMove" MouseLeave="ClickLeave" Foreground="White" Name="btnSendImage" Height="auto" Width="auto" FontSize="15" Padding="5" FontFamily="\source\bold.otf" Click="SendImage">
+                        <StackPanel>
+                            <Image Source="Image/imageEdit.png" Width="25" />
+                        </StackPanel>
+                    </Button>
+                    <Button Template="{DynamicResource ButtonTemplate1}" MouseMove="ClickMove" MouseLeave="ClickLeave" Foreground="White" Name="btnSend" Content="Отправить" Height="auto" FontSize="15" Padding="5" FontFamily="\source\bold.otf" Click="SendMessage"/>
+                </StackPanel>
             </StackPanel>
         </ScrollViewer>
     </Grid>

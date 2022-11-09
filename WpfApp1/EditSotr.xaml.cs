@@ -142,21 +142,14 @@ namespace WpfApp1
             {
                 if (MessageBox.Show("Вы подтверждаете добавление?", "Добавление сотрудника", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.Yes)
                 {
-                    SqlConnection con = new SqlConnection(sqlCon.ConString);
-                    SqlCommand com = new SqlCommand("select * from sotrLoginChecked where login like '" + login.Text + "';", con);
-                    SqlDataAdapter ad = new SqlDataAdapter(com);
-                    DataTable dt = new DataTable();
-                    ad.Fill(dt);
+                    DataTable dt = sqlCon.sqlServer("select * from sotrLoginChecked where login like '" + login.Text + "';");
                     if (dt.Rows.Count > 0)
                     {
                         MessageBox.Show("Такой логин уже есть!");
                     }
                     else
                     {
-                        com = new SqlCommand("insert into Sotr values ( " + post + ", " + privil + ", '" + family.Text + "', '" + name.Text + "', '" + MiddleName.Text + "', '" + login.Text + "', '" + security.getHash(password.Text) + "', " + level + ");", con);
-                        ad = new SqlDataAdapter(com);
-                        dt = new DataTable();
-                        ad.Fill(dt);
+                        sqlCon.sqlServer("insert into Sotr values ( " + post + ", " + privil + ", '" + family.Text + "', '" + name.Text + "', '" + MiddleName.Text + "', '" + login.Text + "', '" + security.getHash(password.Text) + "', " + level + ");");
                         security.logsInsert("Добавление сотрудника - " + name.Text + " " + family.Text);
                     }
                 }
@@ -179,19 +172,14 @@ namespace WpfApp1
         {
             if (MessageBox.Show("Вы подтверждаете изменение?", "Изменение сотрудника", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.Yes)
             {
-                SqlConnection con = new SqlConnection(sqlCon.ConString);
-                SqlCommand com = new SqlCommand("", con);
                 if (password.Text == "" && password.Text == " ")
                 {
-                    com = new SqlCommand("update sotr set Post = " + post + ", Privilegies = " + privil + ", Family = '" + family.Text + "', Name = '" + name.Text + "', MiddleName = '" + MiddleName.Text + "', login = '" + login.Text + "', levelWork = " + level + " where id_sotr=" + ID + ";", con);
+                    sqlCon.sqlServer("update sotr set Post = " + post + ", Privilegies = " + privil + ", Family = '" + family.Text + "', Name = '" + name.Text + "', MiddleName = '" + MiddleName.Text + "', login = '" + login.Text + "', levelWork = " + level + " where id_sotr=" + ID + ";");
                 }
                 else
                 {
-                    com = new SqlCommand("update sotr set Post = " + post + ", Privilegies = " + privil + ", Family = '" + family.Text + "', Name = '" + name.Text + "', MiddleName = '" + MiddleName.Text + "', login = '" + login.Text + "', levelWork = " + level + ", password = '"+security.getHash(password.Text)+"' where id_sotr=" + ID + ";", con);
+                    sqlCon.sqlServer("update sotr set Post = " + post + ", Privilegies = " + privil + ", Family = '" + family.Text + "', Name = '" + name.Text + "', MiddleName = '" + MiddleName.Text + "', login = '" + login.Text + "', levelWork = " + level + ", password = '" + security.getHash(password.Text) + "' where id_sotr=" + ID + ";");
                 }
-                SqlDataAdapter ad = new SqlDataAdapter(com);
-                DataTable dt = new DataTable();
-                ad.Fill(dt);
                 security.logsInsert("Изменение для сотрудника - " + ID);
             }
         }

@@ -1,11 +1,16 @@
 ﻿using System;
+using System.Data.SqlClient;
+using System.Data;
+using System.Linq;
+using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
-using System.Data.SqlClient;
-using System.Data;
+using System.IO;
+using f = System.Windows.Forms;
 
 namespace WpfApp1
 {
@@ -17,8 +22,7 @@ namespace WpfApp1
         private string sqlChat;
         private static int WhenChat;
         private static string sqlCheckSum;
-        private SqlCommand _cm;
-        private delegate void DataBind(string TextChat);
+
 
         private string userName;
         private string homeLink;
@@ -32,6 +36,7 @@ namespace WpfApp1
             posts.Content = sqlCon.Post;
             b2.BorderBrush = new SolidColorBrush(Color.FromRgb(0, 113, 188));
             b3.BorderBrush = new SolidColorBrush(Color.FromRgb(0, 113, 188));
+            btnSendImage.Background = new SolidColorBrush(Color.FromRgb(0, 113, 188));
             btnSend.Background = new SolidColorBrush(Color.FromRgb(0, 113, 188));
             BtnOut.Background = new SolidColorBrush(Color.FromRgb(0, 113, 188));
             BtnOut.BorderBrush = new SolidColorBrush(Color.FromRgb(0, 113, 188));
@@ -77,16 +82,9 @@ namespace WpfApp1
         {
             if (MessageBox.Show("Вы подтверждаете выбор?\nДействие не обратимо.", "Отправить заявку на следующий уровень", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.Yes)
             {
-                SqlConnection con = new SqlConnection(sqlCon.ConString);
-                SqlCommand com = new SqlCommand("update Complaint set Sotr = " + -2 + ", Level = 2 where id_complaint=" + -chatFunc.IDcomplaint + ";", con);
-                SqlDataAdapter ad = new SqlDataAdapter(com);
-                DataTable dt = new DataTable();
-                ad.Fill(dt);
+                sqlCon.sqlServer("update Complaint set Sotr = " + -2 + ", Level = 2 where id_complaint=" + -chatFunc.IDcomplaint + ";");
                 DateTime dateTimeChat = DateTime.Now;
-                com = new SqlCommand("insert into chat values (" + sqlCon.ID.ToString() + ", " + WhenChat.ToString() + ", '" + dateTimeChat.ToString() + "', 'Ваше обращение переведено на старшего сотрудника!', " + -chatFunc.IDcomplaint + ");", con);
-                ad = new SqlDataAdapter(com);
-                dt = new DataTable();
-                ad.Fill(dt);
+                sqlCon.sqlServer("insert into chat values (" + sqlCon.ID.ToString() + ", " + WhenChat.ToString() + ", '" + dateTimeChat.ToString() + "', 'Ваше обращение переведено на старшего сотрудника!', " + -chatFunc.IDcomplaint + ", null);");
                 btnSend.IsEnabled = false;
                 BtnToHelp.IsEnabled = false;
                 BtnToActive.IsEnabled = false;
@@ -98,17 +96,9 @@ namespace WpfApp1
         {
             if (MessageBox.Show("Вы подтверждаете выбор?\nДействие не обратимо.", "Закрыть обращение", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.Yes)
             {
-                SqlConnection con = new SqlConnection(sqlCon.ConString);
                 DateTime dateTimeChat = DateTime.Now;
-                SqlCommand com = new SqlCommand("update Complaint set Active = " + 0 + ", dateElimination = '" + dateTimeChat.ToString() + "' where id_complaint=" + -chatFunc.IDcomplaint + ";", con);
-                SqlDataAdapter ad = new SqlDataAdapter(com);
-                DataTable dt = new DataTable();
-                ad.Fill(dt);
-                
-                com = new SqlCommand("insert into chat values (" + sqlCon.ID.ToString() + ", " + WhenChat.ToString() + ", '" + dateTimeChat.ToString() + "', 'Ваше обращение было закрыто!', " + -chatFunc.IDcomplaint + ");", con);
-                ad = new SqlDataAdapter(com);
-                dt = new DataTable();
-                ad.Fill(dt);
+                sqlCon.sqlServer("update Complaint set Active = " + 0 + ", dateElimination = '" + dateTimeChat.ToString() + "' where id_complaint=" + -chatFunc.IDcomplaint + ";");
+                sqlCon.sqlServer("insert into chat values (" + sqlCon.ID.ToString() + ", " + WhenChat.ToString() + ", '" + dateTimeChat.ToString() + "', 'Ваше обращение было закрыто!', " + -chatFunc.IDcomplaint + ", null);");
                 btnSend.IsEnabled = false;
                 BtnToHelp.IsEnabled = false;
                 BtnToActive.IsEnabled = false;
@@ -131,7 +121,7 @@ namespace WpfApp1
             if (checkSum != test)
             {
                 checkSum = test;
-                LoadBDAsync();
+                CallBack();
             }
         }
 
@@ -145,11 +135,7 @@ namespace WpfApp1
             if (textSend.Text != "" && textSend.Text != " ")
             {
                 DateTime dateTimeChat = DateTime.Now;
-                SqlConnection con = new SqlConnection(sqlCon.ConString);
-                SqlCommand com = new SqlCommand("insert into chat values ("+ sqlCon.ID.ToString() + ", " + WhenChat.ToString() + ", '"+ dateTimeChat.ToString() + "', '"+textSend.Text+"', "+ -chatFunc.IDcomplaint + ");", con);
-                SqlDataAdapter adapter = new SqlDataAdapter(com);
-                DataTable dat = new DataTable();
-                adapter.Fill(dat);
+                sqlCon.sqlServer("insert into chat values (" + sqlCon.ID.ToString() + ", " + WhenChat.ToString() + ", '" + dateTimeChat.ToString() + "', '" + textSend.Text + "', " + -chatFunc.IDcomplaint + ", NULL);");
                 textSend.Text = "";
             }
             else
@@ -157,6 +143,36 @@ namespace WpfApp1
                 MessageBox.Show("Пустое сообщение", "Внимание", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
             
+        }
+
+        private void SendImage(object sender, RoutedEventArgs e)
+        {
+            f.OpenFileDialog o = new f.OpenFileDialog();
+            o.Filter = "Ваше изображение | *.png; *.jpg; *.jpeg;";
+            if (o.ShowDialog() == f.DialogResult.OK)
+            {
+                BitmapImage bi = new BitmapImage();
+                bi.BeginInit();
+                bi.UriSource = new Uri(o.FileName, UriKind.Relative);
+                bi.CacheOption = BitmapCacheOption.OnLoad;
+                bi.EndInit();
+
+                PngBitmapEncoder pe = new PngBitmapEncoder();
+                MemoryStream ms = new MemoryStream();
+
+                StringBuilder sb = new StringBuilder();
+
+                pe.Frames.Add(BitmapFrame.Create(bi));
+                pe.Save(ms);
+                byte[] imgB = ms.ToArray();
+                foreach (byte b in imgB)
+                {
+                    sb.Append(b).Append(';');
+                }
+                sb.Remove(sb.Length - 1, 1);
+                DateTime dateTimeChat = DateTime.Now;
+                sqlCon.sqlServer("insert into chat values (" + sqlCon.ID.ToString() + ", " + WhenChat.ToString() + ", '" + dateTimeChat.ToString() + "', 'IMAGESSEND', " + -chatFunc.IDcomplaint + ", '"+ sb.ToString() + "');");
+            }
         }
 
         private void ClickLeave(object sender, RoutedEventArgs e)
@@ -179,38 +195,157 @@ namespace WpfApp1
             (sender as Button).Foreground = new SolidColorBrush(Color.FromRgb(0, 113, 188));
         }
 
-        private void LoadBDAsync()
+        public static Border whatBords()
         {
-            SqlConnection con = new SqlConnection(sqlCon.ConString);
-            _cm = new SqlCommand(sqlChat, con);
-            con.Open();
+            //Создает кнопку
+            Border bd = new Border();
+            bd.CornerRadius = new CornerRadius(10, 10, 5, 5);
+            bd.BorderBrush = new SolidColorBrush(Color.FromRgb(0, 113, 188));
+            bd.BorderThickness = new Thickness(2);
+            bd.Padding = new Thickness(5);
+            bd.Margin = new Thickness(3);
+            bd.Width = 200;
 
-            _cm.BeginExecuteReader(new AsyncCallback(CallBack), new object(), CommandBehavior.CloseConnection);
+            return bd;
         }
 
-        private void CallBack(System.IAsyncResult oResult)
+        private Button buttonOpen()
         {
-            SqlDataReader read = _cm.EndExecuteReader(oResult);
+            //Создает кнопку
+            Button bt = new Button();
+            bt.Content = "увеличить";
+            bt.Height = Double.NaN;
+            bt.Margin = new Thickness(2, 4, 2, 2);
+            bt.Background = new SolidColorBrush(Color.FromRgb(255, 255, 255));
+            bt.Click += (s, e) => imageOpen(s, e);
 
-            string TextChat = "";
+            return bt;
+        }
+
+        
+        private void CallBack()
+        {
+            //очищает чат
+            while (chats.Children.Count > 0)
+                chats.Children.RemoveAt(0);
+            SqlConnection con = new SqlConnection(sqlCon.ConString);
+            con.Open();
+            SqlCommand com = new SqlCommand(sqlChat, con);
+            SqlDataReader read = com.ExecuteReader();
             while (read.Read())
             {
-                TextChat = TextChat + "👤 " + read[3] +
-                    " " + read[0] +
-                    " " + read[1] +
-                    ":\n" + read[2] + "\n";
+                Border bd = whatBords();
+                StackPanel pn = new StackPanel();
+                string hours = read[3].ToString();
+                string minute = read[4].ToString();
+                if (hours.Length == 1)
+                    hours = "0" + hours;
+                if (minute.Length == 1)
+                    minute = "0" + minute;
+
+                if (read[5].ToString() == sqlCon.ID.ToString())
+                {
+                    bd.HorizontalAlignment = HorizontalAlignment.Right;
+                    if (read[2].ToString()== "IMAGESSEND")
+                    {
+                        //Создает блок картинки
+                        Image imageBl = new Image();
+                        imageBl.Width = 200;
+                        string ImageS = read[9].ToString();
+                        byte[] imageByte = ImageS.Split(';').Select(a => byte.Parse(a)).ToArray();
+                        MemoryStream ms = new MemoryStream(imageByte);
+                        imageBl.Source = BitmapFrame.Create(ms, BitmapCreateOptions.None, BitmapCacheOption.OnLoad);
+
+                        TextBlock textTitle = new TextBlock();
+                        textTitle.FontSize = 10;
+                        textTitle.TextAlignment = TextAlignment.Right;
+                        textTitle.Text = "вы " + hours+":"+minute;
+
+                        Button bt = buttonOpen();
+                        bt.Name = "id" + read[10];
+
+                        pn.Children.Add(imageBl);
+                        pn.Children.Add(bt);
+                        pn.Children.Add(textTitle);
+                        bd.Child = pn;
+                        chats.Children.Add(bd);
+                    }
+                    else
+                    {
+                        TextBlock textBl = new TextBlock();
+                        textBl.Text = read[2].ToString();
+                        textBl.TextWrapping = TextWrapping.Wrap;
+
+
+                        TextBlock textTitle = new TextBlock();
+                        textTitle.FontSize = 10;
+                        textTitle.TextAlignment = TextAlignment.Right;
+                        textTitle.Text = "вы " + hours + ":" + minute;
+
+                        pn.Children.Add(textBl);
+                        pn.Children.Add(textTitle);
+                        bd.Child = pn;
+                        chats.Children.Add(bd);
+                    }
+                }
+                else
+                {
+                    bd.HorizontalAlignment = HorizontalAlignment.Left;
+                    if (read[2].ToString() == "IMAGESSEND")
+                    {
+                        //Создает блок картинки
+                        Image imageBl = new Image();
+                        imageBl.Width = 200;
+                        string ImageS = read[9].ToString();
+                        byte[] imageByte = ImageS.Split(';').Select(a => byte.Parse(a)).ToArray();
+                        MemoryStream ms = new MemoryStream(imageByte);
+                        imageBl.Source = BitmapFrame.Create(ms, BitmapCreateOptions.None, BitmapCacheOption.OnLoad);
+
+
+
+                        TextBlock textTitle = new TextBlock();
+                        textTitle.FontSize = 10;
+                        textTitle.TextAlignment = TextAlignment.Left;
+                        textTitle.Text = read[0] + " " + read[1] + " " + hours + ":" + minute;
+
+                        Button bt = buttonOpen();
+                        bt.Name = "id" + read[10];
+
+                        pn.Children.Add(imageBl);
+                        pn.Children.Add(bt);
+                        pn.Children.Add(textTitle);
+                        bd.Child = pn;
+                        chats.Children.Add(bd);
+                    }
+                    else
+                    {
+                        TextBlock textBl = new TextBlock();
+                        textBl.Text = read[2].ToString();
+                        textBl.TextWrapping = TextWrapping.Wrap;
+
+
+                        TextBlock textTitle = new TextBlock();
+                        textTitle.FontSize = 10;
+                        textBl.TextAlignment = TextAlignment.Right;
+                        textTitle.TextAlignment = TextAlignment.Left;
+                        textTitle.Text = read[0] + " " + read[1] + " " + hours + ":" + minute;
+
+                        pn.Children.Add(textBl);
+                        pn.Children.Add(textTitle);
+                        bd.Child = pn;
+                        chats.Children.Add(bd);
+                    }
+                }
 
             }
+            scrolling.ScrollToEnd();
             read.Close();
-            Dispatcher.Invoke(new DataBind(DataBindProc), TextChat);
         }
-
-        private void DataBindProc(string TextChat)
+        private void imageOpen(object sender, EventArgs e)
         {
-            chat.Text = TextChat;
-            chat.ScrollToEnd();
+            //Открывает форму с картинкой
+            Window imagesWindow = new imageOpens((sender as Button).Name);
+            imagesWindow.Show();
         }
-
-
     }
 }

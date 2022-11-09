@@ -6,12 +6,10 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Navigation;
+using System.Threading;
 
 namespace WpfApp1
 {
-    /// <summary>
-    /// Логика взаимодействия для clientChecked.xaml
-    /// </summary>
     public partial class clientChecked : Page
     {
         private delegate void RefreshData();
@@ -57,18 +55,22 @@ namespace WpfApp1
 
                 if (checkSumBD != resultsql)
                 {
-
                     checkSumBD = resultsql;
-                    dataGrids.ItemsSource = null;
-                    com = new SqlCommand("exec viewClient;", con);
-                    ad = new SqlDataAdapter(com);
-                    dt = new DataTable();
-                    ad.Fill(dt);
-                    dataGrids.ItemsSource = dt.DefaultView;
+                    ThreadStart writeSecon = new ThreadStart(LoadBd);
+                    Thread thread = new Thread(writeSecon);
+                    thread.Start();
                 }
             }
         }
 
+        private void LoadBd()
+        {
+            DataTable dt = sqlCon.sqlServer("exec viewClient;");
+            this.Dispatcher.Invoke(() => {
+                dataGrids.ItemsSource = null;
+                dataGrids.ItemsSource = dt.DefaultView;
+            });
+        }
 
         private void ContackInfoChanged(object callar, SqlNotificationEventArgs e)
         {
@@ -86,11 +88,7 @@ namespace WpfApp1
             {
                 DataRowView row = (DataRowView)dataGrids.SelectedItems[0];
                 string ID = row["ID"].ToString();
-                SqlConnection con = new SqlConnection(sqlCon.ConString);
-                SqlCommand com = new SqlCommand("delete from Client where id_client = " + ID + ";", con);
-                SqlDataAdapter ad = new SqlDataAdapter(com);
-                DataTable dt = new DataTable();
-                ad.Fill(dt);
+                sqlCon.sqlServer("delete from Client where id_client = " + ID + ";");
                 security.logsInsert("Удаление клиента - " + ID);
             }
         }

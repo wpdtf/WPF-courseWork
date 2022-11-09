@@ -315,11 +315,7 @@ namespace WpfApp1
                 {
                     string[] masId = (sender as TextBox).Name.Split(new char[] { '_' }); ;
                     string textId = masId[1];
-                    SqlConnection con = new SqlConnection(sqlCon.ConString);
-                    SqlCommand com = new SqlCommand("update Complaint set Sotr = " + sqlCon.ID + " where id_complaint=" + textId+ ";", con);
-                    SqlDataAdapter ad = new SqlDataAdapter(com);
-                    DataTable dt = new DataTable();
-                    ad.Fill(dt);
+                    sqlCon.sqlServer("update Complaint set Sotr = " + sqlCon.ID + " where id_complaint=" + textId + ";");
                 }    
             }
         }

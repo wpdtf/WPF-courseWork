@@ -93,10 +93,11 @@
         <StackPanel Grid.Column="3" Grid.Row="0" VerticalAlignment="Top" HorizontalAlignment="Right">
             <Button MouseMove="ClickMove" Margin="10" MouseLeave="ClickLeave" BorderThickness="3" BorderBrush="#0085bc" Click="ClickBack" Name="BtnOut" Foreground="White" Background="#0085bc" Content="Закрыть" Height="40" Width="100" FontSize="20" Padding="5" FontFamily="\source\bold.otf" />
         </StackPanel>
-        <ScrollViewer VerticalScrollBarVisibility="Auto" Grid.Row="2" Grid.ColumnSpan="3" >
+        <ScrollViewer Name="scrolling" VerticalScrollBarVisibility="Auto" Grid.Row="2" Grid.ColumnSpan="3" >
             <StackPanel Name="stackEdit"  Margin="10" VerticalAlignment="Top" Width="600">
             <Label Content="История чата" FontFamily="\source\bold.otf" Width="auto" />
-            <TextBox HorizontalAlignment="Left" Template="{DynamicResource TextBoxTemplate1}" Name="chat" Height="auto" Width="550" TextWrapping="Wrap" AcceptsReturn="True" Text="" IsReadOnly="True" FontSize="15" Padding="5" FontFamily="\source\bold.otf"/>
+                <StackPanel Name="chats" Orientation="Vertical" Width="500" TextBlock.FontSize="15" TextBlock.FontFamily="\source\bold.otf">
+                </StackPanel>
             </StackPanel>
         </ScrollViewer>
     </Grid>

@@ -14,6 +14,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Threading;
 
 namespace WpfApp1
 {
@@ -71,14 +72,20 @@ namespace WpfApp1
                 {
 
                     checkSumBD = resultsql;
-                    dataGrids.ItemsSource = null;
-                    com = new SqlCommand("select * from rateChecked;", con);
-                    ad = new SqlDataAdapter(com);
-                    dt = new DataTable();
-                    ad.Fill(dt);
-                    dataGrids.ItemsSource = dt.DefaultView;
+                    ThreadStart writeSecon = new ThreadStart(updateBD);
+                    Thread thread = new Thread(writeSecon);
+                    thread.Start();
                 }
             }
+        }
+
+        private void updateBD()
+        {
+            DataTable dt = sqlCon.sqlServer("select * from rateChecked;");
+            this.Dispatcher.Invoke(() => {
+                dataGrids.ItemsSource = null;
+                dataGrids.ItemsSource = dt.DefaultView;
+            });
         }
 
 
@@ -103,11 +110,7 @@ namespace WpfApp1
                     string nameT = row["Название тарифа"].ToString();
                     string disT = row["Описание тарифа"].ToString();
                     string prT = row["Стоимость тарифа (в мес.)"].ToString();
-                    SqlConnection con = new SqlConnection(sqlCon.ConString);
-                    SqlCommand com = new SqlCommand("delete from rate where id_rate = " + ID + ";", con);
-                    SqlDataAdapter ad = new SqlDataAdapter(com);
-                    DataTable dt = new DataTable();
-                    ad.Fill(dt);
+                    sqlCon.sqlServer("delete from rate where id_rate = " + ID + ";");
                     security.logsInsert("Удаление тарифа - " + ID + " " + nameT + " " + disT + " " + prT);
                 }
                 catch
